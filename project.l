@@ -11,6 +11,8 @@ strings ["][A-Z|a-z|0-9|=|*|+|\-|/|%|^|==|>=|<=|>|<|~|!=|" "|;|"\t"|"\n"|(|)]*["
 headers #include<[a-z]+.h>
 
 %%
+"//"					{ printf("Comment encountered.\n"); }
+"/*"([^*]|\*+[^.])*\*+"/"		{ printf("Multi-line comment encountered.\n"); }
 "main" 					{ printf("Main encountered\n"); }
 "printf("				{ printf("printf encountered\n"); }
 "{" 					{ printf("Open bracket encountered\n"); }

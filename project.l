@@ -12,10 +12,12 @@ W [0-9]+
 N [1-9]+
 F [0-9]+[.][0-9]+[f]?
 identifier [a-z][a-z|A-Z|0-9|_]*
-strings ["][A-Z|a-z|0-9|=|*|+|\-|/|%|^|==|>=|<=|>|<|~|!=|" "|;|"\t"|"\n"|(|)]*["]
+strings \"(\\.|[^"\\])*\"
 headers #include<[a-z]+.h>
-
+define #define
 %%
+{headers}				{ printf("%s is a header\n", yytext);}
+{define}				{ printf("%s is #define\n",yytext);}		
 "//"					{ printf("Comment encountered.\n"); }
 "/*"([^*]|\*+[^.])*\*+"/"		{ printf("Multi-line comment encountered.\n"); }
 "main" 					{ printf("Main encountered\n"); }
@@ -28,7 +30,7 @@ headers #include<[a-z]+.h>
 {strings}					{ printf("%s is a string\n",yytext);}
 {keywords}                              { printf("%s is a keyword\n", yytext);
 						insert(yytext,2);}
-{headers}				{ printf("%s is a header\n", yytext);}				
+		
 {identifier} 				{ insert(yytext,1);
 					  printf("%s Identifier encountered\n",yytext);
 					  }

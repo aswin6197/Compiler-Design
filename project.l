@@ -1,8 +1,13 @@
 %{
+#include <stdio.h>
+#include <stdlib.h>
+#include "mytable.h"
+
 int ptr = 0;
 %}
 keywords auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while
-A [a-z|A-Z]
+L [a-z|A-Z]
+A   [a-zA-Z_0-9]
 W [0-9]+
 N [1-9]+
 F [0-9]+[.][0-9]+[f]?
@@ -21,15 +26,23 @@ headers #include<[a-z]+.h>
 "["|"]"					{ printf("");}
 {keywords}" "{identifier}[(]([a-z|" "|","|"*"|]|"[]")*[)] { printf("%s is a function\n"); }
 {strings}					{ printf("%s is a string\n",yytext);}
-{keywords}                              { printf("%s is a keyword\n", yytext);}
+{keywords}                              { printf("%s is a keyword\n", yytext);
+						insert(yytext,2);}
 {headers}				{ printf("%s is a header\n", yytext);}				
-{identifier} 				{ printf("Identifier encountered\n");}
-[==|>=|<=|>|<|~|!=]			{ printf("%s is a logical operator\n",yytext);}
-[=|*|+|\-|/|%|^|&|'|\||/|\\|.]		{ printf("%s is an operator\n",yytext);}
-{W}|{N} 				{ printf("%s is an Integer constant\n", yytext);}
-{F} 					{ printf("%s is a float constant\n", yytext);}
+{identifier} 				{ insert(yytext,1);
+					  printf("%s Identifier encountered\n",yytext);
+					  }
+[==|>=|<=|>|<|~|!=]			{ printf("%s is a logical operator\n",yytext);
+						insert(yytext,4);}
+[=|*|+|\-|/|%|^|&|'|\||/|\\|.]		{ printf("%s is an operator\n",yytext);
+						insert(yytext,4);}
+{W}|{N} 				{ printf("%s is an Integer constant\n", yytext);
+						insert(yytext,3);}
+{F} 					{ printf("%s is a float constant\n", yytext);
+						insert(yytext,3);}
 "NULL"					{ printf("NULL encountered\n"); }
 "EOF"					{ printf("EOF encountered\n"); }
+
 <*>.|\n 				{ printf("Error in %s\n", yytext);}
 %%
 
@@ -37,7 +50,7 @@ int main(){
 
 	yyin = fopen("abc.txt","r");
 	yylex();
-	
+	prin();
 	return 0;
 }
 

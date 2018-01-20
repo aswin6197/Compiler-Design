@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "mytable.h"
-
+int line = 1;
 int ptr = 0;
 %}
 keywords auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while
@@ -16,6 +16,7 @@ strings \"(\\.|[^"\\])*\"
 headers #include<[a-z]+.h>
 define #define
 %%
+"\n"					{line++;}
 {headers}				{ printf("%s is a header\n", yytext);}
 {define}				{ printf("%s is #define\n",yytext);}		
 "//"					{ printf("Comment encountered.\n"); }
@@ -45,12 +46,12 @@ define #define
 "NULL"					{ printf("NULL encountered\n"); }
 "EOF"					{ printf("EOF encountered\n"); }
 
-<*>.|\n 				{ printf("Error in %s\n", yytext);}
+<*>.|\n 				{ printf("Error in %s at line %d\n", yytext,line);}
 %%
 
 int main(){
 
-	yyin = fopen("abc.txt","r");
+	yyin = fopen("comment-error.c","r");
 	yylex();
 	prin();
 	return 0;

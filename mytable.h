@@ -1,4 +1,3 @@
-#define NSYMS 100
 #include<string.h>
 struct symtab {
     char name[10];

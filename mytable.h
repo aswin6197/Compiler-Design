@@ -22,23 +22,23 @@ void prin()
 	
 		printf("\n\t %s",s->name);
 		printf("%*c", 15-strlen(s->name), ' ');
-		printf("%s",map[s->value-1]);
+		printf("NULL");
 		s = s->next;
 	}
 	printf("\n\t %s ",s->name);
-	printf("%*c",15-strlen(s->name),' ');
-	printf("%s\n",map[s->value-1]);
+	printf("%*c",14-strlen(s->name),' ');
+	printf("NULL\n");
 	return;
 }
 
-void insert(char *s,int v){
+void insert(char *s){
 	
 	struct symtab *p = table;
 	if(p == NULL)	{
 		p = malloc(sizeof(struct symtab));
 		int i;
 		strcpy(p->name,s);
-		p->value = v;
+		p->value = NULL;
 		p->next = NULL;
 		table = p;
 		return;
@@ -55,7 +55,7 @@ void insert(char *s,int v){
 	struct symtab *temp;
 	temp = malloc(sizeof(struct symtab));
 	strcpy(temp->name,s);
-	temp->value = v;
+	temp->value = NULL;
 	temp->next = NULL;
 	p->next = temp;
 	return;

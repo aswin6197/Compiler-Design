@@ -30,19 +30,19 @@ define #define
 {keywords}" "{identifier}[(]([a-z|" "|","|"*"|]|"[]")*[)] { printf("%s is a function\n"); }
 {strings}					{ printf("%s is a string\n",yytext);}
 {keywords}                              { printf("%s is a keyword\n", yytext);
-						insert(yytext,2);}
+						}
 		
-{identifier} 				{ insert(yytext,1);
+{identifier} 				{ insert(yytext);
 					  printf("%s Identifier encountered\n",yytext);
 					  }
 [==|>=|<=|>|<|~|!=]			{ printf("%s is a logical operator\n",yytext);
-						insert(yytext,4);}
+						}
 [=|*|+|\-|/|%|^|&|'|\||/|\\|.]		{ printf("%s is an operator\n",yytext);
-						insert(yytext,4);}
+						}
 {W}|{N} 				{ printf("%s is an Integer constant\n", yytext);
-						insert(yytext,3);}
+						}
 {F} 					{ printf("%s is a float constant\n", yytext);
-						insert(yytext,3);}
+						}
 "NULL"					{ printf("NULL encountered\n"); }
 "EOF"					{ printf("EOF encountered\n"); }
 

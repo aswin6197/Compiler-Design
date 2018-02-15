@@ -12,22 +12,37 @@ struct symtab *symlook();
 struct symtab *table;
 void prin()
 {
-	printf("1 identifiers \n2 keywords\n3 constants \n4 operators");
+	//printf("1 identifiers \n2 keywords\n3 constants \n4 operators");
 	struct symtab *s = table;
 	char map[4][20] = {"Identifier","Keyword","Constants","Operators"};
 	printf("\n-----------------------------Symbol Table-------------------------");
-	printf("\n\t Name \t\t Value");
+	printf("\n\t Name \t\t type");
 	while(s->next!=NULL){
 	
 		printf("\n\t %s",s->name);
 		printf("%*c", 15-strlen(s->name), ' ');
-		printf("NULL");
+		printf("%s",s->type);
 		s = s->next;
 	}
 	printf("\n\t %s ",s->name);
 	printf("%*c",14-strlen(s->name),' ');
 	printf("NULL\n");
 	return;
+}
+
+void add_datatype(char *id,char *type){
+	printf("%s %s",id,type);
+	struct symtab *s = table;
+	while(1){
+	if(strcmp(s->name,id)==0)
+	{	printf("found \n");
+		strcpy(s->type,type);
+		break;
+	}
+  	s = s->next;
+	if(s == NULL)
+		break;
+}
 }
 
 void insert(char *s){
@@ -59,5 +74,3 @@ void insert(char *s){
 	p->next = temp;
 	return;
 }
-
-

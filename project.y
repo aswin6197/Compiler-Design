@@ -21,7 +21,9 @@
 %token ID
 %token CHAR
 %token  INT
-%token FLOAT
+%token FLOAT LONG SHORT SIGNED UNSIGNED
+
+
 
 %token STRING
 
@@ -95,6 +97,8 @@ var_def_list
 var_def
     :   types ID
 
+    | types ASTERISK ID
+
     | ID
 
     | STRING
@@ -108,15 +112,23 @@ types
 
     | FLOAT
 
+    | UNSIGNED INT
+
+    | SIGNED INT
+
+    | LONG INT 
+
+    | SHORT INT
+
     ;
 
 block_statement
-    :   CB_OPEN statements CB_CLOSE
+    :   CB_OPEN statements CB_CLOSE 
 
     ;
 
 statements
-    : statements statement 
+    : statement statements 
 
     | statement 
 
@@ -158,7 +170,7 @@ for_loop
 initialisation
     : types var_def_list ';'
 
-    | types ID ASSIGNMENT expression ';'
+    | types ID ASSIGNMENT expression ';' {	add_datatype($2,$1); }
 
     | ID ASSIGNMENT expression ';'
 
@@ -226,6 +238,12 @@ assignment_statement
 
     | ID PLUS PLUS
 
+    | PLUS PLUS ID
+
+    | ID MINUS MINUS
+
+    | MINUS MINUS ID
+
     | array ASSIGNMENT expression 
 
     | error {} 
@@ -257,7 +275,7 @@ expression
 
     | '(' expression ')' 
   
-    
+    | STRING
 
     ;
 
@@ -270,19 +288,19 @@ char_expression
     ;
 
 %%
-
 #include"lex.yy.c"
 int yyerror(char *s){
 	
-    printf(" %d %s  %s ",line,yytext,s);
-   exit(0);
-
+	printf(" %d %s  %s ",line,yytext,s);
+	exit(0);
 }
-
 int main(){
-extern FILE *yyin;
+
+	extern FILE *yyin;
 	yyin = fopen("abc.txt","r");
 	yyparse();
 	printf("\n Successful Parsing \n");
+	prin();
+	
 	return 0;
 }

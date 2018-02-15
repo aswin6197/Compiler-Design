@@ -8,7 +8,7 @@ int ptr = 0;
 %}
 
 
-keywords auto|break|case|const|continue|default|do|double|enum|extern|float|for|goto|long|register|short|signed|sizeof|static|switch|typedef|union|unsigned|void|volatile
+keywords auto|break|case|const|continue|default|do|double|enum|extern|for|goto|long|register|short|signed|sizeof|static|switch|typedef|union|unsigned|void|volatile
 L [a-z|A-Z]
 UNDER [_]
 A   [a-zA-Z_0-9]
@@ -22,21 +22,23 @@ strings \"(\\.|[^"\\])*\"
 define #define
 %%
 
-{W}                        {            return NUMBER; }
-
+{W}                        		{ return NUMBER; }
+{F}                                     { return NUMBER;}
+{strings}				{ return STRING; }
 int					{ return INT; }
 "char"					{ return CHAR; }
+"float"                                 { return FLOAT;}
 "if"					{ return(IF); }
 "else"					{ return(ELSE); }
 "for"                                   { return FOR;}
-"and"                   { return(AND); }
-"not"                   { return(NOT); }
-"while"                 { return WHILE;}
-"return"                { return RETURN; }
-"or"                    { return(OR); }  
-"define"                { return(DEFINE);}
-"struct"                { return (STRUCT);}
-"include"                               {   return (INCLUDE);}
+"and"                  			{ return(AND); }
+"not"                   		{ return(NOT); }
+"while"                 		{ return WHILE;}
+"return"                		{ return RETURN; }
+"or"                    		{ return(OR); }  
+"define"                		{ return(DEFINE);}
+"struct"                		{ return (STRUCT);}
+"include"                               { return (INCLUDE);}
 "printf"                                { return (PRINTF);}
 "{"					{ return CB_OPEN; }
 "}"					{ return CB_CLOSE; }
@@ -52,41 +54,36 @@ int					{ return INT; }
 ">"					{ return MORE; }
 "=="					{ return EQUAL; }
 "!="					{ return NOT_EQUAL; }
-","                     { return COMMA;}
-"'"                     {return QUOT;}
+","                     		{ return COMMA;}
+"'"                     		{return QUOT;}
 
-{UNDER}{L}*                    { return LITERAL_C ; }
+{UNDER}{L}*                    		{ return LITERAL_C ; }
 
-{keywords}                              { printf("%s is a keyword\n", yytext);}
+{keywords}                              {}
 
-{identifier} 			{ //yylval.b = yytext; 
-                       
-                        return(ID); }
+{identifier} 				{ return(ID); }
 
 
 "\n"					{line++;}
 
 	
-"//"					{ printf("Comment encountered.\n"); }
-"/*"([^*]|\*+[^.])*\*+"/"		{ printf("Multi-line comment encountered.\n"); }
+"//"					{ }
+"/*"([^*]|\*+[^.])*\*+"/"		{ }
 
 
-[" "|"\t"]		{ printf("");}
+[" "|"\t"]				{ printf("");}
 
-{strings}					{ return STRING;}
+
 
 		
-[~]			{ printf("%s is a logical operator\n",yytext);
-						}
-[%|^|&|'|\||/|\\]		{ printf("%s is an operator\n",yytext);
-						}
+[~]					{}
+[%|^|&|'|\||/|\\]			{}
  				
-{F} 					{ printf("%s is a float constant\n", yytext);
-						}
-"NULL"					{ printf("NULL encountered\n"); }
-"EOF"					{ printf("EOF encountered\n"); }
+{F} 					{}
+"NULL"					{}
+"EOF"					{}
 
-. 				{ return yytext[0];printf("Error in %s at line %d\n", yytext,line);}
+. 					{ return yytext[0];}
 %%
 
 

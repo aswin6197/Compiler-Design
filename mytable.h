@@ -26,22 +26,25 @@ void prin()
 	}
 	printf("\n\t %s ",s->name);
 	printf("%*c",14-strlen(s->name),' ');
-	printf("NULL\n");
+	printf("%s\n",s->type);
 	return;
 }
 
 void add_datatype(char *id,char *type){
-	printf("%s %s",id,type);
+	
+	
 	struct symtab *s = table;
 	while(1){
 	if(strcmp(s->name,id)==0)
-	{	printf("found \n");
+	{	//printf("found \n");
+		s->type = malloc(strlen(type)*sizeof(char));
 		strcpy(s->type,type);
 		break;
 	}
-  	s = s->next;
-	if(s == NULL)
+	if(s->next == NULL)
 		break;
+  	s = s->next;
+	
 }
 }
 

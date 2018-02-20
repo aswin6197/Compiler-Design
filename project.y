@@ -4,6 +4,9 @@
     #include <ctype.h>
     #include <string.h>
 	
+char t;
+//extern int line;
+extern char *temp;
 %}
 
 
@@ -20,9 +23,8 @@
 %token LITERAL_C
 %token ID
 %token CHAR
-%token  INT
+%token INT
 %token FLOAT LONG SHORT SIGNED UNSIGNED
-
 
 
 %token STRING
@@ -39,6 +41,14 @@
 %left PLUS MINUS
 %left ASTERISK SLASH
 
+%union
+{
+    char    name[100];
+    int     val;
+}
+
+
+%type<name> types ID
  
 %%
 
@@ -47,12 +57,18 @@ program
 
     | funcdef
 
+    | program funcdeclaration
+
     | preprocessor program
 
     | struct program
 
     |
     ;
+
+funcdeclaration
+    : types ID args ';'
+    ; 
 
 struct
     : STRUCT ID CB_OPEN interior CB_CLOSE ';'
@@ -97,8 +113,6 @@ var_def_list
 var_def
     :   types ID
 
-    | types ASTERISK ID
-
     | ID
 
     | STRING
@@ -106,29 +120,29 @@ var_def
     ;
 
 types
-    : INT
+    : INT {t = 'i';}
 
-    | CHAR
+    | CHAR {t = 'c';}
 
-    | FLOAT
+    | FLOAT {t = 'f';}
 
-    | UNSIGNED INT
+    | SHORT
 
-    | SIGNED INT
+    | SIGNED
 
-    | LONG INT 
+    | UNSIGNED
 
-    | SHORT INT
+    | LONG
 
     ;
 
 block_statement
-    :   CB_OPEN statements CB_CLOSE 
+    :   CB_OPEN statements CB_CLOSE
 
     ;
 
 statements
-    : statement statements 
+    : statements statement 
 
     | statement 
 
@@ -170,7 +184,10 @@ for_loop
 initialisation
     : types var_def_list ';'
 
-    | types ID ASSIGNMENT expression ';' {	add_datatype($2,$1); }
+    | types ID ASSIGNMENT expression ';'{ 
+						if(t == 'f') add_datatype(temp,"float");
+						else if(t == 'i') add_datatype(temp,"int");
+						else if(t == 'c') add_datatype(temp,"char"); }
 
     | ID ASSIGNMENT expression ';'
 
@@ -179,7 +196,8 @@ initialisation
     | STRUCT ID ID ';'
 
     ;
-    
+
+
 conditional_statement
     
     : IF '(' conditions ')' block_statement elsest 
@@ -238,12 +256,6 @@ assignment_statement
 
     | ID PLUS PLUS
 
-    | PLUS PLUS ID
-
-    | ID MINUS MINUS
-
-    | MINUS MINUS ID
-
     | array ASSIGNMENT expression 
 
     | error {} 
@@ -288,19 +300,20 @@ char_expression
     ;
 
 %%
+
 #include"lex.yy.c"
 int yyerror(char *s){
 	
-	printf(" %d %s  %s ",line,yytext,s);
-	exit(0);
-}
-int main(){
+    printf(" %d %s  %s ",line,yytext,s);
+   exit(0);
 
-	extern FILE *yyin;
+}
+
+int main(){
+extern FILE *yyin;
 	yyin = fopen("abc.txt","r");
 	yyparse();
 	printf("\n Successful Parsing \n");
 	prin();
-	
 	return 0;
 }

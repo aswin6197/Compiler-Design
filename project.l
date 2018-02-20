@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "mytable.h"
-
+char *temp;
 int line = 1;
 int ptr = 0;
 %}
@@ -62,7 +62,10 @@ int					{ return INT; }
 "'"                     		{ return QUOT;}
 {UNDER}{L}*                    		{ return LITERAL_C ; }
 {keywords}                              {}
-{identifier} 				{insert(yytext);return(ID);}
+{identifier} 				{insert(yytext);
+					temp = malloc(sizeof(char)*(strlen(yytext)+1));
+					strcpy(temp,yytext);						
+					;return(ID);}
 "\n"					{line++;}
 "//"					{}
 "/*"([^*]|\*+[^.])*\*+"/"		{}

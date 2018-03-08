@@ -28,6 +28,7 @@ define #define
 "signed"				{ return SIGNED;}
 "unsigned"				{ return UNSIGNED;}
 {F}                                     { return NUMBER;}
+"main"				{return MAIN;}	
 {strings}				{ return STRING; }
 int					{ return INT; }
 "char"					{ return CHAR; }
@@ -61,8 +62,9 @@ int					{ return INT; }
 ","                     		{ return COMMA;}
 "'"                     		{ return QUOT;}
 {UNDER}{L}*                    		{ return LITERAL_C ; }
-{keywords}                              {}
-{identifier} 				{insert(yytext);
+{keywords}                              { return KEYWORD;}
+{identifier} 				{
+					insert(yytext);
 					temp = malloc(sizeof(char)*(strlen(yytext)+1));
 					strcpy(temp,yytext);						
 					;return(ID);}

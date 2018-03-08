@@ -14,12 +14,10 @@ extern char *temp;
 
 %token	 COMMA  WHILE RETURN  DEFINE INCLUDE PRINTF STRUCT
 %token	IF ELSE CB_OPEN CB_CLOSE PLUS MINUS ASTERISK SLASH ASSIGNMENT FOR PERCENT
-%token	OR AND NOT LESS LESS_EQUAL MORE_EQUAL MORE EQUAL NOT_EQUAL QUOT
-
-        
+%token	OR AND NOT LESS LESS_EQUAL MORE_EQUAL MORE EQUAL NOT_EQUAL QUOT KEYWORD    
         
 
-%token NUMBER
+%token NUMBER MAIN
 %token LITERAL_C
 %token ID
 %token CHAR
@@ -41,6 +39,8 @@ extern char *temp;
 %left PLUS MINUS
 %left ASTERISK SLASH
 
+%type<val> expression NUMBER
+
 %union
 {
     char    name[100];
@@ -48,7 +48,7 @@ extern char *temp;
 }
 
 
-%type<name> types ID
+
  
 %%
 
@@ -65,34 +65,44 @@ program
 
     |
     ;
+idorkey 
+    : ID
+ 
+    | KEYWORD {printf("\n illegal identifier ");exit(0);} 
+
+    ;
+
 
 funcdeclaration
-    : types ID args ';'
+    : types idorkey args ';'
+
     ; 
 
 struct
-    : STRUCT ID CB_OPEN interior CB_CLOSE ';'
+    : STRUCT idorkey CB_OPEN interior CB_CLOSE ';'
 
     ;
 
 interior
-    :types ID ';' interior
+    :types idorkey ';' interior
 
     |
 
     ;
 
 preprocessor
-    : '#' DEFINE ID NUMBER
+    : '#' DEFINE idorkey NUMBER
 
-    | '#' INCLUDE LESS ID '.' ID MORE
+    | '#' INCLUDE LESS idorkey '.' idorkey MORE
 
     | '#' INCLUDE STRING
 
     ;
 
 funcdef
-    : types ID args block_statement
+    : types idorkey args block_statement
+
+    | types MAIN args block_statement
 
     ;
 
@@ -111,9 +121,9 @@ var_def_list
 
     
 var_def
-    :   types ID
+    :   types idorkey
 
-    | ID
+    | idorkey
 
     | STRING
 
@@ -155,7 +165,7 @@ statement
 
     | PRINTF args ';'
 
-    | initialisation  
+    |{printf("\nhere1");} initialisation  
 
     | conditional_statement 
 
@@ -170,9 +180,9 @@ statement
     ;
 
 array
-   : ID '[' expression ']' 
+   : idorkey '[' expression ']' 
 
-   | ID '['expression ']' ';' 
+   | idorkey '['expression ']' ';' 
 
    ;
 
@@ -184,16 +194,16 @@ for_loop
 initialisation
     : types var_def_list ';'
 
-    | types ID ASSIGNMENT expression ';'{ 
+    | types idorkey ASSIGNMENT expression ';'{ 
 						if(t == 'f') add_datatype(temp,"float");
 						else if(t == 'i') add_datatype(temp,"int");
 						else if(t == 'c') add_datatype(temp,"char"); }
 
-    | ID ASSIGNMENT expression ';'
+    | idorkey ASSIGNMENT expression ';'
 
     | types array
 
-    | STRUCT ID ID ';'
+    | STRUCT idorkey idorkey ';'
 
     ;
 
@@ -242,19 +252,21 @@ conditions
     ;
 
 assignment_statement
-    :types ID ASSIGNMENT char_expression 
+    :types idorkey ASSIGNMENT char_expression 
 
-    | ID ASSIGNMENT char_expression 
+    | idorkey ASSIGNMENT char_expression 
 
-    | types ID ASSIGNMENT expression
+    | types idorkey ASSIGNMENT expression {if(!isdigit($4))
+						printf("\n type mismatch");}
  
-    | ID ASSIGNMENT expression 
+    | idorkey ASSIGNMENT expression {if(!isdigit($3))
+						printf("\n type mismatch");}
 
-    | ID '.' ID ASSIGNMENT expression
+    | idorkey '.' idorkey ASSIGNMENT expression
     
-    | types ID ASSIGNMENT
+    | types idorkey ASSIGNMENT
 
-    | ID PLUS PLUS
+    | idorkey PLUS PLUS
 
     | array ASSIGNMENT expression 
 
@@ -267,13 +279,13 @@ ret_statement
     ;
     
 expression
-    : NUMBER 
+    : NUMBER {$$ = $1;}
 
-    | ID 
+    | idorkey 
 
     | array  
 
-    | ID '.' ID
+    | idorkey '.' idorkey
 
     | expression PLUS expression 
 
@@ -287,7 +299,7 @@ expression
 
     | '(' expression ')' 
   
-    | STRING
+    | STRING  
 
     ;
 

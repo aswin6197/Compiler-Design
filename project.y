@@ -5,6 +5,8 @@
     #include <string.h>
 	
 char t;
+int flag = 0;
+int nest = 0;
 //extern int line;
 extern char *temp;
 %}
@@ -53,20 +55,38 @@ extern char *temp;
 %%
 
 program
-    :program funcdef 
 
-    | funcdef
+    :funcdef  program 
+    
+    |globlinit program 
 
     | program funcdeclaration
 
     | preprocessor program
 
     | struct program
-
+    
     |
     ;
+globlinit
+     : types var_def_list ';'
+
+    | types idorkey ASSIGNMENT expression ';'{
+						if(t == 'f') add_datatype(temp,"float",0,0);
+						else if(t == 'i') add_datatype(temp,"int",0,0);
+						else if(t == 'c') add_datatype(temp,"char",0,0);}
+						
+
+    | idorkey ASSIGNMENT expression ';'
+
+    | types array
+
+    | STRUCT idorkey idorkey ';'
+
+    ;
+
 idorkey 
-    : ID
+    : ID 
  
     | KEYWORD {printf("\n illegal identifier ");exit(0);} 
 
@@ -100,9 +120,9 @@ preprocessor
     ;
 
 funcdef
-    : types idorkey args block_statement
+    : types  idorkey args{flag++;} block_statement
 
-    | types MAIN args block_statement
+    | types {flag++;} MAIN args block_statement
 
     ;
 
@@ -121,9 +141,9 @@ var_def_list
 
     
 var_def
-    :   types idorkey
+    :   types idorkey 
 
-    | idorkey
+    | idorkey 
 
     | STRING
 
@@ -147,7 +167,7 @@ types
     ;
 
 block_statement
-    :   CB_OPEN statements CB_CLOSE
+    :   CB_OPEN {nest++;} statements CB_CLOSE {nest--;}
 
     ;
 
@@ -165,7 +185,7 @@ statement
 
     | PRINTF args ';'
 
-    |{printf("\nhere1");} initialisation  
+    | initialisation  
 
     | conditional_statement 
 
@@ -194,12 +214,13 @@ for_loop
 initialisation
     : types var_def_list ';'
 
-    | types idorkey ASSIGNMENT expression ';'{ 
-						if(t == 'f') add_datatype(temp,"float");
-						else if(t == 'i') add_datatype(temp,"int");
-						else if(t == 'c') add_datatype(temp,"char"); }
+    | types idorkey ASSIGNMENT expression ';'{
+						if(t == 'f') add_datatype(temp,"float",flag,nest);
+						else if(t == 'i') add_datatype(temp,"int",flag,nest);
+						else if(t == 'c') add_datatype(temp,"char",flag,nest); }
 
-    | idorkey ASSIGNMENT expression ';'
+    | idorkey ASSIGNMENT expression ';'{if(check_scope(temp,flag,nest) == 0)
+    										printf("\nvariable %s out of scope",temp);}
 
     | types array
 
@@ -279,7 +300,7 @@ ret_statement
     ;
     
 expression
-    : NUMBER {$$ = $1;}
+    : NUMBER 
 
     | idorkey 
 

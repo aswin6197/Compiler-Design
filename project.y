@@ -29,10 +29,8 @@ extern char *temp;
 
 %token STRING
 
-%union { char * intval;
-        char  charval;
-        struct symtab *symp;
-        //struct exval *test;
+%union { char name[20];
+        int value
         }
 
 
@@ -41,22 +39,20 @@ extern char *temp;
 %left PLUS MINUS
 %left ASTERISK SLASH
 
-%type<val> expression NUMBER
 
 %union
 {
-    char    name[100];
     int     val;
+    char    name[100];
 }
 
 
-
- 
+%type<name> ID idorkey 
 %%
 
 program
 
-    :funcdef  program 
+    :funcdef program 
     
     |globlinit program 
 
@@ -72,9 +68,9 @@ globlinit
      : types var_def_list ';'
 
     | types idorkey ASSIGNMENT expression ';'{
-						if(t == 'f') add_datatype(temp,"float",0,0);
-						else if(t == 'i') add_datatype(temp,"int",0,0);
-						else if(t == 'c') add_datatype(temp,"char",0,0);}
+						if(t == 'f') add_datatype(temp,"float",0);
+						else if(t == 'i') add_datatype(temp,"int",0);
+						else if(t == 'c') add_datatype(temp,"char",0);}
 						
 
     | idorkey ASSIGNMENT expression ';'
@@ -86,7 +82,11 @@ globlinit
     ;
 
 idorkey 
-    : ID 
+    : ID {char *$$;
+		$$ = malloc(strlen($1)*sizeof(char));
+		strcpy($$,$1);
+	//$$.value = $1;
+}
  
     | KEYWORD {printf("\n illegal identifier ");exit(0);} 
 
@@ -120,9 +120,9 @@ preprocessor
     ;
 
 funcdef
-    : types  idorkey args{flag++;} block_statement
+    : types  idorkey {;lookup($2,1);} args block_statement
 
-    | types {flag++;} MAIN args block_statement
+    | types MAIN args block_statement
 
     ;
 
@@ -143,7 +143,11 @@ var_def_list
 var_def
     :   types idorkey 
 
-    | idorkey 
+    | idorkey {
+			if(t == 'f') add_datatype(temp,"float",nest);
+			else if(t == 'i') add_datatype(temp,"int",nest);
+			else if(t == 'c') add_datatype(temp,"char",nest); }
+
 
     | STRING
 
@@ -167,7 +171,7 @@ types
     ;
 
 block_statement
-    :   CB_OPEN {nest++;} statements CB_CLOSE {nest--;}
+    :   CB_OPEN {nest++;} statements CB_CLOSE {scope(nest);nest--;}
 
     ;
 
@@ -215,9 +219,9 @@ initialisation
     : types var_def_list ';'
 
     | types idorkey ASSIGNMENT expression ';'{
-						if(t == 'f') add_datatype(temp,"float",flag,nest);
-						else if(t == 'i') add_datatype(temp,"int",flag,nest);
-						else if(t == 'c') add_datatype(temp,"char",flag,nest); }
+						if(t == 'f') add_datatype(temp,"float",nest);
+						else if(t == 'i') add_datatype(temp,"int",nest);
+						else if(t == 'c') add_datatype(temp,"char",nest); }
 
     | idorkey ASSIGNMENT expression ';'{if(check_scope(temp,flag,nest) == 0)
     										printf("\nvariable %s out of scope",temp);}
@@ -277,11 +281,13 @@ assignment_statement
 
     | idorkey ASSIGNMENT char_expression 
 
-    | types idorkey ASSIGNMENT expression {if(!isdigit($4))
-						printf("\n type mismatch");}
+    | types idorkey ASSIGNMENT expression {//if(!isdigit($4))
+						//printf("\n type mismatch");
+					}
  
-    | idorkey ASSIGNMENT expression {if(!isdigit($3))
-						printf("\n type mismatch");}
+    | idorkey ASSIGNMENT expression {//if(!isdigit($3))
+						//printf("\n type mismatch");
+					}
 
     | idorkey '.' idorkey ASSIGNMENT expression
     

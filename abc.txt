@@ -2,13 +2,13 @@
 int main(){
 	char n = "aswin";
 	int a = 6;
-	{int c=1;}
+	int b,c;
 	{float c=2;}
 }
-int n =1;	
+
+
+	
 char add(){
-
-
 if(c < 100){{
 	int d = 10;
 }}

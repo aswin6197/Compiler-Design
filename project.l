@@ -67,7 +67,7 @@ int					{ return INT; }
 					insert(yytext);
 					temp = malloc(sizeof(char)*(strlen(yytext)+1));
 					strcpy(temp,yytext);						
-					;return(ID);}
+					return(ID);}
 "\n"					{line++;}
 "//"					{}
 "/*"([^*]|\*+[^.])*\*+"/"		{}

@@ -1,16 +1,16 @@
 
 int main(){
-	
-	int break = 10;
+	char n = "aswin";
+	int a = 6;
+	{int c=1;}
+	{float c=2;}
 }
+int n =1;	
+char add(){
 
-char add(int ,char  ,char);
 
-char add(int a, char b	,char e){
-	if(c < 1){
-		int d = 10;
-		int arr[40];
-		arr[100] = 4;
-		}
-	int x = 5;
+if(c < 100){{
+	int d = 10;
+}}
+
 }

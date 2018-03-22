@@ -1,7 +1,8 @@
 
 int main(){
 	
-	int break = 10;
+	{int x = 10;}
+	x = 2; 
 }
 
 char add(int ,char  ,char);
@@ -10,7 +11,7 @@ char add(int a, char b	,char e){
 	if(c < 1){
 		int d = 10;
 		int arr[40];
-		arr[100] = 4;
+		arr[24] = 4;
 		}
 	int x = 5;
 }

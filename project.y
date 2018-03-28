@@ -7,8 +7,9 @@
 char t;
 int flag = 0;
 int nest = 0;
-//extern int line;
+extern int line;
 extern char *temp;
+extern char num[10];
 %}
 
 
@@ -29,38 +30,29 @@ extern char *temp;
 
 %token STRING
 
-%union { char * intval;
-        char  charval;
-        struct symtab *symp;
-        //struct exval *test;
+%union { char name[20];
+        int value;
+	char typ;
         }
 
 
-
-
+%type<name>  idorkey ID
+%type<typ> types var_def
+%type<name> var_def_list args
+%type<value> expression NUMBER array
+ 
 %left PLUS MINUS
 %left ASTERISK SLASH
 
-%type<val> expression NUMBER
-
-%union
-{
-    char    name[100];
-    int     val;
-}
-
-
-
- 
 %%
 
 program
 
-    :funcdef  program 
+    :funcdef program 
     
     |globlinit program 
 
-    | program funcdeclaration
+    |  funcdeclaration program
 
     | preprocessor program
 
@@ -72,10 +64,13 @@ globlinit
      : types var_def_list ';'
 
     | types idorkey ASSIGNMENT expression ';'{
-						if(t == 'f') add_datatype(temp,"float",0,0);
-						else if(t == 'i') add_datatype(temp,"int",0,0);
-						else if(t == 'c') add_datatype(temp,"char",0,0);}
-						
+						if(t == 'f') 
+							add_datatype(temp,"float",0);
+						else if(t == 'i') 
+							add_datatype(temp,"int",0);
+						else if(t == 'c') 
+							add_datatype(temp,"char",0);
+					     }
 
     | idorkey ASSIGNMENT expression ';'
 
@@ -86,15 +81,15 @@ globlinit
     ;
 
 idorkey 
-    : ID 
+    : ID 					{ strcpy($$,temp); }
  
-    | KEYWORD {printf("\n illegal identifier ");exit(0);} 
+    | KEYWORD 					{ printf("\n Reserved identifier misuse.\n"); exit(0);} 
 
     ;
 
 
 funcdeclaration
-    : types idorkey args ';'
+    : types idorkey args ';' 			{ char t[1];t[0] = $1;insertparams($2,$3,t);}
 
     ; 
 
@@ -104,7 +99,7 @@ struct
     ;
 
 interior
-    :types idorkey ';' interior
+    : types idorkey ';' interior
 
     |
 
@@ -120,41 +115,45 @@ preprocessor
     ;
 
 funcdef
-    : types  idorkey args{flag++;} block_statement
-
-    | types {flag++;} MAIN args block_statement
+    : types  idorkey  args block_statement 	{	
+						 if(lookup($2,$3) == 0)
+					       	 	{     	
+							printf("\n %s function with parameters %s is not declared.\n",$2,$3);
+							exit(0);
+						 	}
+						}
+    | types MAIN args block_statement
 
     ;
 
 args
-    :  '(' var_def_list ')'
+    :  '(' var_def_list ')' 			{ strcpy($$,$2);}
 
     ;
     
 var_def_list
-    :var_def COMMA var_def
+    :var_def_list COMMA var_def 		{ strcpy($$,$1);$$[strlen($1)]=$3;}
 
-    |var_def 
+    |var_def 					{ $$[0] = $1;}
     |
 
     ;
 
     
 var_def
-    :   types idorkey 
+    : types 					{ $$ = $1;}  
 
-    | idorkey 
-
-    | STRING
+    | types idorkey 				{ $$ = $1;}
+  
 
     ;
 
 types
-    : INT {t = 'i';}
+    : INT 					{ $$ = 'i';t = 'i';}
 
-    | CHAR {t = 'c';}
+    | CHAR 					{ $$= 'c';t = 'c';}
 
-    | FLOAT {t = 'f';}
+    | FLOAT 					{ $$ = 'f';t = 'f';}
 
     | SHORT
 
@@ -167,7 +166,7 @@ types
     ;
 
 block_statement
-    :   CB_OPEN {nest++;} statements CB_CLOSE {nest--;}
+    :   CB_OPEN {nest++; } statements CB_CLOSE 	{ prin();scope(nest);nest--;}
 
     ;
 
@@ -180,10 +179,22 @@ statements
 
     ;
 
+funcall
+    : ID '(' var_list ')' 
+ 
+     
+
+     ;
+
 statement
     : block_statement 
 
-    | PRINTF args ';'
+    | PRINTF '(' var_list ')'';'
+
+    | funcall ';'
+
+    | assignment_statement ';' 
+
 
     | initialisation  
 
@@ -193,16 +204,15 @@ statement
 
     | for_loop
 
-    | assignment_statement ';' 
-
+    
     | ret_statement ';'
 
     ;
 
 array
-   : idorkey '[' expression ']' 
+   : idorkey '[' expression ']' 		{$$ = $3;}
 
-   | idorkey '['expression ']' ';' 
+   | idorkey '['expression ']' ';' 		{$$ = $3;}
 
    ;
 
@@ -211,18 +221,37 @@ for_loop
 
     ;
 
+var_list
+    : ID COMMA var_list 
+
+    | ID   					{
+						if(t == 'f') 
+							add_datatype(temp,"float",nest);
+						else if(t == 'i') 
+							add_datatype(temp,"int",nest);
+						else if(t == 'c') 
+							add_datatype(temp,"char",nest); 
+						}
+
+    | STRING COMMA var_list
+
+    | STRING
+    ;
+
 initialisation
-    : types var_def_list ';'
+    : types var_list ';'
 
-    | types idorkey ASSIGNMENT expression ';'{
-						if(t == 'f') add_datatype(temp,"float",flag,nest);
-						else if(t == 'i') add_datatype(temp,"int",flag,nest);
-						else if(t == 'c') add_datatype(temp,"char",flag,nest); }
 
-    | idorkey ASSIGNMENT expression ';'{if(check_scope(temp,flag,nest) == 0)
-    										printf("\nvariable %s out of scope",temp);}
+   
+    | types array 				{
+			
+						if($1 == 'i')
+							add_datatype(temp,"int",nest);
 
-    | types array
+						//printf("\n %d",atoi(num));		
+						//printf("n %s %d",temp,yytext[0]);		
+						add_arrdim(temp,atoi(num));
+						}
 
     | STRUCT idorkey idorkey ';'
 
@@ -273,15 +302,55 @@ conditions
     ;
 
 assignment_statement
-    :types idorkey ASSIGNMENT char_expression 
+    : types idorkey  ASSIGNMENT expression 	{	if(check_status($2))
+    								{
+					
+								printf("\nVariable %s redeclared on line %d",temp,line);
+				    				exit(0);
+								}
+					
+							//if(check_scope(temp,flag,nest) == 0)
+    							//{printf("\nvariable %s out of scope",temp);
+				    			//exit(0);}
+					
+							if(t == 'f') add_datatype(temp,"float",nest);
+							else if(t == 'i') add_datatype(temp,"int",nest);
+							else if(t == 'c') add_datatype(temp,"char",nest);
 
-    | idorkey ASSIGNMENT char_expression 
+					
+							if( $1 =='c'){
+								printf("\nType mismatch in %s.\n",$2);
+								exit(0);
+								}
+             					}
 
-    | types idorkey ASSIGNMENT expression {if(!isdigit($4))
-						printf("\n type mismatch");}
- 
-    | idorkey ASSIGNMENT expression {if(!isdigit($3))
-						printf("\n type mismatch");}
+     | idorkey ASSIGNMENT expression 	 	{
+							if(find_type($1)==0){
+								printf("\nType mismatch or undeclared variable in %s.\n",$1);
+								exit(0);
+								}
+					
+					
+							if(check_scope(temp,nest) == 0)
+    								{
+								printf("\nVariable %s out of scope at line %d.\n",temp,line);
+								exit(0);
+								}
+                				}
+     | types idorkey ASSIGNMENT char_expression 
+
+    | idorkey ASSIGNMENT char_expression 	{
+							if(check_scope(temp,nest) == 0)
+    								{
+								printf("\nVariable %s out of scope.\n",temp);
+				    				exit(0);
+								}
+							if(find_type($1)=='i' || find_type($1) == 'f'){
+								printf("\n Type mismatch in %s",$1);
+								exit(0);
+								}
+						}
+
 
     | idorkey '.' idorkey ASSIGNMENT expression
     
@@ -289,7 +358,14 @@ assignment_statement
 
     | idorkey PLUS PLUS
 
-    | array ASSIGNMENT expression 
+    | array ASSIGNMENT expression 		{
+							//printf("work %d %s",$1,temp);
+							if(get_arrdim(temp) <= $1)
+								{
+								printf("\n Array %s - Index out of bound.\n",temp);
+								exit(0);
+								}
+						}
 
     | error {} 
     ;
@@ -300,7 +376,7 @@ ret_statement
     ;
     
 expression
-    : NUMBER 
+    : NUMBER 					{	$$ = atoi(num);		}
 
     | idorkey 
 
@@ -308,27 +384,25 @@ expression
 
     | idorkey '.' idorkey
 
-    | expression PLUS expression 
+    | expression PLUS expression 		{	$$ = $1+$3;		}
 
-    | expression MINUS expression 
+    | expression MINUS expression 		{	$$ = $1-$3;		}
 
-    | expression ASTERISK expression
+    | expression ASTERISK expression 		{	$$ = $1*$3;		}
 
-    | expression SLASH expression 
+    | expression SLASH expression 		{	$$ = $1/$3;		}
    
-    | expression PERCENT expression
+    | expression PERCENT expression 		{	$$ = $1%$3;		}
 
-    | '(' expression ')' 
+    | '(' expression ')' 			{	$$ = $2;		}
   
-    | STRING  
+    | STRING  					{	printf("\n Type mismatch.\n");}
 
     ;
 
 
 char_expression
-    : QUOT LITERAL_C QUOT
-
-	| LITERAL_C
+    : LITERAL_C
 
     ;
 
@@ -346,7 +420,7 @@ int main(){
 extern FILE *yyin;
 	yyin = fopen("abc.txt","r");
 	yyparse();
-	printf("\n Successful Parsing \n");
+	printf("\n SUCCESSFUL PARSING \n");
 	prin();
 	return 0;
 }

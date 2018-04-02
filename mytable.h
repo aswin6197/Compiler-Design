@@ -1,4 +1,5 @@
 #include<string.h>
+int Index = 0;
 struct symtab {
     char name[10];
     int value;
@@ -12,7 +13,71 @@ struct symtab {
     struct symtab *next;
 };
 
+struct stack{
+    char *items[10];
+    int top;
+}Stk;
 
+void push(char *ip){
+	printf("\n here");
+    if(Stk.top == 10)
+    {	printf("\n stack full");
+	return;
+    }
+    Stk.items[Stk.top] = (char *)malloc(strlen(ip) + 1);
+    strcpy(Stk.items[Stk.top],ip);
+    Stk.top++;
+}
+
+void dispStk(){
+	int i;
+	for(i = Stk.top-1;i>=0;i--)
+		printf("\n %s",Stk.items[i]);
+}
+
+char *pop()
+{
+//printf("work");
+  int i;
+  if(Stk.top==-1)
+  {
+     printf("\nStack Empty!! \n");
+     exit(0);
+  }
+  char *str;
+	//printf("\n %d",Stk.top);
+  str = malloc(sizeof(char)*(strlen(Stk.items[Stk.top-1])));
+  strcpy(str,Stk.items[Stk.top-1]);
+  free(Stk.items[Stk.top-1]);
+  Stk.top--;
+  return(str);
+}
+
+  struct Quadruple
+  {
+    char operator[5];
+    char operand1[10];
+    char operand2[10];
+    char result[10];
+  }QUAD[25];
+
+void display_Quadruple()
+{
+  int i;
+  printf("\n\n The INTERMEDIATE CODE Is : \n\n");
+  printf("\n\n The Quadruple Table \n\n");
+  printf("\n     Result  Operator  Operand1  Operand2  ");
+  for(i=0;i<Index;i++)
+    printf("\n %d     %s          %s          %s          %s",i,QUAD[i].result,QUAD[i].operator,QUAD[i].operand1,QUAD[i].operand2);
+}
+
+ void addQuadruple(char op[10],char op2[10],char op1[10],char res[10]){
+                                        strcpy(QUAD[Index].operator,op);
+                                        strcpy(QUAD[Index].operand2,op2);
+                                        strcpy(QUAD[Index].operand1,op1);
+                                        strcpy(QUAD[Index].result,res);
+                    Index++;
+}
 
 struct symtab *symlook();
 struct symtab *table = NULL;

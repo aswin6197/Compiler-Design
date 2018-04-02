@@ -3,6 +3,7 @@
     #include <stdlib.h>
     #include <ctype.h>
     #include <string.h>
+
 	
 char t;
 int flag = 0;
@@ -10,6 +11,9 @@ int nest = 0;
 extern int line;
 extern char *temp;
 extern char num[10];
+int temp_var = 0;
+
+char *pop();
 %}
 
 
@@ -302,7 +306,8 @@ conditions
     ;
 
 assignment_statement
-    : types idorkey  ASSIGNMENT expression 	{	if(check_status($2))
+    : types idorkey  ASSIGNMENT expression 	{	
+								if(check_status($2))
     								{
 					
 								printf("\nVariable %s redeclared on line %d",temp,line);
@@ -322,9 +327,13 @@ assignment_statement
 								printf("\nType mismatch in %s.\n",$2);
 								exit(0);
 								}
+							addQuadruple("=","",pop(),$2);
+							
+							
              					}
 
-     | idorkey ASSIGNMENT expression 	 	{
+     | idorkey ASSIGNMENT expression 	 	{			
+							addQuadruple("=","",pop(),$1);
 							if(find_type($1)==0){
 								printf("\nType mismatch or undeclared variable in %s.\n",$1);
 								exit(0);
@@ -376,23 +385,57 @@ ret_statement
     ;
     
 expression
-    : NUMBER 					{	$$ = atoi(num);		}
+    : NUMBER 					{	$$ = atoi(num);	
+							char temp[10];
+					                snprintf(temp,10,"%d",$$);    
+        						push(temp);	}	
 
-    | idorkey 
+    | idorkey                                   {       push($1);	}
 
     | array  
 
     | idorkey '.' idorkey
 
-    | expression PLUS expression 		{	$$ = $1+$3;		}
+    | expression PLUS expression 		{	$$ = $1+$3; 
+							char str[5],str1[5]="t";
+					                sprintf(str, "%d", temp_var);    
+                        				strcat(str1,str);
+                    					temp_var++;
+                    					addQuadruple("+",pop(),pop(),str1);                                
+                    					push(str1);		}
 
-    | expression MINUS expression 		{	$$ = $1-$3;		}
+    | expression MINUS expression 		{	$$ = $1-$3;
+							char str[5],str1[5]="t";
+				                        sprintf(str, "%d", temp_var);    
+                        				strcat(str1,str);
+                    					temp_var++;
+                                			addQuadruple("-",pop(),pop(),str1);
+                                           		push(str1);		}
 
-    | expression ASTERISK expression 		{	$$ = $1*$3;		}
+    | expression ASTERISK expression 		{	$$ = $1*$3;	
+	                          			char str[5],str1[5]="t";
+                					sprintf(str, "%d", temp_var);        
+            						strcat(str1,str);
+        						temp_var++;
+        						addQuadruple("*",pop(),pop(),str1);
+                                			push(str1);
+										}
 
-    | expression SLASH expression 		{	$$ = $1/$3;		}
+    | expression SLASH expression 		{	$$ = $1/$3;	
+							char str[5],str1[5]="t";
+					                sprintf(str, "%d", temp_var);        
+	         					strcat(str1,str);
+        						temp_var++;
+        						addQuadruple("/",pop(),pop(),str1);
+             						push(str1);		}
    
-    | expression PERCENT expression 		{	$$ = $1%$3;		}
+    | expression PERCENT expression 		{	$$ = $1%$3;	
+							char str[5],str1[5]="t";
+					                sprintf(str, "%d", temp_var);        
+	         					strcat(str1,str);
+        						temp_var++;
+        						addQuadruple("%",pop(),pop(),str1);
+             						push(str1);	}
 
     | '(' expression ')' 			{	$$ = $2;		}
   
@@ -422,5 +465,6 @@ extern FILE *yyin;
 	yyparse();
 	printf("\n SUCCESSFUL PARSING \n");
 	prin();
+	display_Quadruple();
 	return 0;
 }

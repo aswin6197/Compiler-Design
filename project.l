@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include "mytable.h"
 char *temp;
-char num[10];
 int line = 1;
 int ptr = 0;
 %}
@@ -23,7 +22,7 @@ define #define
 
 %%
 
-{W}                        		{strcpy(num,yytext);return NUMBER; }
+{W}                        		{ return NUMBER; }
 "long"   				{ return LONG;}
 "short"					{ return SHORT;}
 "signed"				{ return SIGNED;}
@@ -54,23 +53,21 @@ int					{ return INT; }
 "/"					{ return SLASH; }
 "="					{ return ASSIGNMENT; }
 "%"                                     { return PERCENT;}
-"&" 					{ return BAND;}
-"<"					{ return LESS; }
 \<\=					{ return LESS_EQUAL; }
+"<"					{ return LESS; }
 ">="					{ return MORE_EQUAL; }
 ">"					{ return MORE; }
 "=="					{ return EQUAL; }
 "!="					{ return NOT_EQUAL; }
 ","                     		{ return COMMA;}
-"'"{A}"'"               		{ return LITERAL_C ; }
 "'"                     		{ return QUOT;}
-
+{UNDER}{L}*                    		{ return LITERAL_C ; }
 {keywords}                              { return KEYWORD;}
 {identifier} 				{
 					insert(yytext);
 					temp = malloc(sizeof(char)*(strlen(yytext)+1));
-					strcpy(temp,yytext);					
-					return(ID);}
+					strcpy(temp,yytext);						
+					;return(ID);}
 "\n"					{line++;}
 "//"					{}
 "/*"([^*]|\*+[^.])*\*+"/"		{}

@@ -1,0 +1,10 @@
+
+int main(){
+	int a = 2;
+	int b = 10;
+	
+	a = b+a*8/6;
+	return 0;
+}
+
+

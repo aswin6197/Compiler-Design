@@ -16,28 +16,35 @@ struct symtab {
 struct stack{
     char *items[10];
     int top;
-}Stk;
+};
+
+struct stack Stk = {.top = -1};
+
+int label[10],ltop=0,lno = 0;
 
 void push(char *ip){
-	printf("\n here");
+	
     if(Stk.top == 10)
     {	printf("\n stack full");
 	return;
     }
+	
+    Stk.top++;
     Stk.items[Stk.top] = (char *)malloc(strlen(ip) + 1);
     strcpy(Stk.items[Stk.top],ip);
-    Stk.top++;
+	
 }
 
 void dispStk(){
 	int i;
+	
 	for(i = Stk.top-1;i>=0;i--)
 		printf("\n %s",Stk.items[i]);
 }
 
 char *pop()
 {
-//printf("work");
+	
   int i;
   if(Stk.top==-1)
   {
@@ -45,11 +52,12 @@ char *pop()
      exit(0);
   }
   char *str;
-	//printf("\n %d",Stk.top);
-  str = malloc(sizeof(char)*(strlen(Stk.items[Stk.top-1])));
-  strcpy(str,Stk.items[Stk.top-1]);
-  free(Stk.items[Stk.top-1]);
+	
+  str = malloc(sizeof(char)*(strlen(Stk.items[Stk.top])));
+  strcpy(str,Stk.items[Stk.top]);
+  free(Stk.items[Stk.top]);
   Stk.top--;
+	
   return(str);
 }
 
@@ -113,14 +121,13 @@ int find_type(char *nam){
 
 
 	struct symtab *p = table;
-	
 	while(p!=NULL)
 	{	if(strcmp(p->name,nam)==0)
-			if(p->type == NULL)
+			{if(p->type == NULL)
 				return 0;
 			if(p->type[0] == 'i' || p->type[0] == 'f')
 				return 1;
-			
+			}
 		if(p->next==NULL)
 			break;	
 		p = p->next;
@@ -329,3 +336,74 @@ while(p!=NULL)
 }
 
 
+void label1()
+{	
+    char temp1[5];
+    char str[5];
+	
+    strcpy(temp1,"t");
+    sprintf(str, "%d", temp_var);
+    strcat(temp1, str);
+    //dispstack();
+    printf("\t%s = not %s\n",temp1,Stk.items[Stk.top]);
+    printf("if %s goto L%d\n",temp1,lno);
+    temp_var++;
+    label[++ltop]=lno++;
+    
+}  
+
+void label2()
+{
+    printf("\tgoto L%d\n",lno);
+    printf("\tL%d:\n",label[ltop]);
+    ltop--;
+    label[++ltop]=lno++;
+}
+
+void label3()
+{
+    printf("\tL%d: \n", label[ltop--]);
+}
+
+
+
+void label4()
+{
+    printf("\tL%d: \n",lno);
+    label[++ltop]=lno++;
+}
+
+void label5()
+{
+    printf("\tgoto L%d \n",label[ltop-1]);
+    printf("\tL%d: \n",label[ltop]);
+    ltop -= 2;
+}
+
+void dispstack(){
+	int i;
+    for(i=Stk.top;i>0;i--){
+	printf("\n %s",Stk.items[i]);
+	}
+}
+
+void codegen()
+{
+    char temp1[5];
+    char str[5];
+	
+    strcpy(temp1,"t");
+    sprintf(str, "%d", temp_var);
+    strcat(temp1, str);
+
+    char op2[5];
+    strcpy(op2,pop());
+    char op[5];
+    strcpy(op,pop());
+    char op1[5];
+    strcpy(op1,pop());
+    printf("\t%s = %s %s %s\n", temp1, op1, op, op2);
+    push(temp1);
+    //strcpy(s[top].value, temp);
+    temp_var++;
+}

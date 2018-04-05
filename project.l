@@ -54,8 +54,9 @@ int					{ return INT; }
 "/"					{ return SLASH; }
 "="					{ return ASSIGNMENT; }
 "%"                                     { return PERCENT;}
-\<\=					{ return LESS_EQUAL; }
+"&" 					{ return BAND;}
 "<"					{ return LESS; }
+\<\=					{ return LESS_EQUAL; }
 ">="					{ return MORE_EQUAL; }
 ">"					{ return MORE; }
 "=="					{ return EQUAL; }

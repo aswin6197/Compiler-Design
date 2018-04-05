@@ -1,0 +1,21 @@
+int summ(int ax){
+	int b = 2*3;
+	return b;
+}
+
+int main(){
+	int a = 2;
+	int c=9;
+	if(a <4){
+		int b;
+		c =  3;
+	}
+	c = addes(2,3);
+	a = 8;
+	return 0;
+}
+int addes(float a,int c){
+	int t = a+c;
+	return t;
+}
+
